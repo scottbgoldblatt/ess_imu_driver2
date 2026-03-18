@@ -236,6 +236,7 @@ class ImuNode : public rclcpp::Node {
 
  private:
   rclcpp::Publisher<std_msgs::msg::UInt32>::SharedPtr seq_pub_;
+  rclcpp::Publisher<std_msgs::msg::UInt32>::SharedPtr count_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_data_pub_;
   rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr imu_tempc_pub_;
