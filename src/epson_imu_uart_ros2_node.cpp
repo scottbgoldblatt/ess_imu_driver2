@@ -530,7 +530,7 @@ class ImuNode : public rclcpp::Node {
       imu_msg->linear_acceleration_covariance[i] = 0;
     }
     imu_msg->orientation_covariance[0] = -1;
-    imu_msg->header.frame_id = frame_id_ + "_c" + std::to_string(epson_data_.count);
+    imu_msg->header.frame_id = frame_id_;
 
     while (rclcpp::ok()) {
       // Call to read and post process IMU sensor burst data
