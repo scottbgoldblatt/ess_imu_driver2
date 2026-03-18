@@ -218,6 +218,7 @@ class ImuNode : public rclcpp::Node {
     imu_tempc_pub_ = this->create_publisher<sensor_msgs::msg::Temperature>(
       temperature_topic_.c_str(), 20);
 
+    count_pub_ = this->create_publisher<std_msgs::msg::UInt32>("/epson_imu/count", 10);
     seq_pub_ = this->create_publisher<std_msgs::msg::UInt32>("/epson_imu/seq", 10);
     // poll_rate_ must be at least 4000Hz (2x the highest IMU
     // output rate of 2000Hz)
@@ -575,6 +576,11 @@ class ImuNode : public rclcpp::Node {
        seq_msg.data = seq++;
        
        seq_pub_->publish(seq_msg);
+
+
+       std_msgs::msg::UInt32 count_msg;
+       count_msg.data = epson_data_.count;
+       count_pub_->publish(count_msg);
 
       } else {
         RCLCPP_WARN(
