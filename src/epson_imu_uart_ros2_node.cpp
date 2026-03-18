@@ -55,7 +55,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/temperature.hpp>
-#include <std_msgs/msg/UInt32.hpp>
+#include "std_msgs/msg/u_int32.hpp"
 
 #include <termios.h>
 #include <iostream>
