@@ -217,6 +217,7 @@ class ImuNode : public rclcpp::Node {
     imu_tempc_pub_ = this->create_publisher<sensor_msgs::msg::Temperature>(
       temperature_topic_.c_str(), 20);
 
+    seq_pub_ = this->create_publisher<std_msgs::msg::UInt32>("/epson_imu/seq", 10);
     // poll_rate_ must be at least 4000Hz (2x the highest IMU
     // output rate of 2000Hz)
     std::chrono::milliseconds ms((int)(1000.0 / poll_rate_));
@@ -232,6 +233,7 @@ class ImuNode : public rclcpp::Node {
   }
 
  private:
+  rclcpp::Publisher<std_msgs::msg::UInt32>::SharedPtr seq_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_data_pub_;
   rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr imu_tempc_pub_;
@@ -253,7 +255,7 @@ class ImuNode : public rclcpp::Node {
   std::string imu_topic_;
   std::string temperature_topic_;
   double poll_rate_;
-
+  
   // Flag for enable/disable time_correction function
   // Time correction requires 1PPS connection to IMU GPIO2_EXT pin
   // and cannot be used with ext_trigger at the same time
@@ -565,6 +567,13 @@ class ImuNode : public rclcpp::Node {
         tempc_msg->temperature = epson_data_.temperature;
         tempc_msg->variance = 0;
         imu_tempc_pub_->publish(*tempc_msg);
+
+       static uint32_t seq = 0;
+
+       std_msgs::msg::UInt32 seq_msg;
+       seq_msg.data = seq++;
+       
+       seq_pub_->publish(seq_msg);
 
       } else {
         RCLCPP_WARN(
