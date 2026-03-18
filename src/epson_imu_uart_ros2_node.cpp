@@ -528,7 +528,7 @@ class ImuNode : public rclcpp::Node {
       imu_msg->linear_acceleration_covariance[i] = 0;
     }
     imu_msg->orientation_covariance[0] = -1;
-    imu_msg->header.frame_id = frame_id_;
+    imu_msg->header.frame_id = frame_id_ + "_c" + std::to_string(epson_data_.count);
 
     while (rclcpp::ok()) {
       // Call to read and post process IMU sensor burst data
@@ -536,7 +536,8 @@ class ImuNode : public rclcpp::Node {
       if (sensorDataReadBurstNOptions(&epson_sensor_, &options_,
                                       &epson_data_)) {
         if (!time_correction_) {
-          imu_msg->header.stamp = this->now();
+          rclcpp::Time stamp(0, epson_data_.count * 16000); // example scaling
+          imu_msg->header.stamp = stamp;
         } else {
           imu_msg->header.stamp = tc.get_stamp(epson_data_.count);
         }
