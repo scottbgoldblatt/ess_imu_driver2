@@ -65,6 +65,7 @@
 #include "hcl_uart.h"
 #include "sensor_epsonUart.h"
 #include "sensor_epsonCommon.h"
+#include <std_msgs/msg/u_int32.hpp>
 
 //=========================================================================
 // Timestamp Correction
