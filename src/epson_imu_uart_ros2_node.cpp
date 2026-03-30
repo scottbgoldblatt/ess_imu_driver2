@@ -522,17 +522,6 @@ class ImuNode : public rclcpp::Node {
     RCLCPP_INFO(this->get_logger(), "Epson IMU initialized.");
     return true;
   }
-void PubImuData() {
-  auto imu_msg = std::make_shared<sensor_msgs::msg::Imu>();
-  auto tempc_msg = std::make_shared<sensor_msgs::msg::Temperature>();
-
-  for (int i = 0; i < 9; i++) {
-    imu_msg->orientation_covariance[i] = 0;
-    imu_msg->angular_velocity_covariance[i] = 0;
-    imu_msg->linear_acceleration_covariance[i] = 0;
-  }
-  imu_msg->orientation_covariance[0] = -1;
-  imu_msg->header.frame_id = frame_id_;
 
 void PubImuData() {
   auto imu_msg = std::make_shared<sensor_msgs::msg::Imu>();
