@@ -534,59 +534,59 @@ void PubImuData() {
   imu_msg->orientation_covariance[0] = -1;
   imu_msg->header.frame_id = frame_id_;
 
-  while (rclcpp::ok()) {
-    // Call to read and post process IMU sensor burst data
-    // Will return 0 if data incomplete or checksum error
-    if (sensorDataReadBurstNOptions(&epson_sensor_, &options_,
-                                    &epson_data_)) {
+void PubImuData() {
+  auto imu_msg = std::make_shared<sensor_msgs::msg::Imu>();
+  auto tempc_msg = std::make_shared<sensor_msgs::msg::Temperature>();
 
-      if (!time_correction_) {
-        rclcpp::Time stamp(0, epson_data_.count * 16000); // example scaling
-        imu_msg->header.stamp = stamp;
-      } else {
-        imu_msg->header.stamp = tc.get_stamp(epson_data_.count);
-      }
+  for (int i = 0; i < 9; i++) {
+    imu_msg->orientation_covariance[i] = 0;
+    imu_msg->angular_velocity_covariance[i] = 0;
+    imu_msg->linear_acceleration_covariance[i] = 0;
+  }
+  imu_msg->orientation_covariance[0] = -1;
+  imu_msg->header.frame_id = frame_id_;
 
-      // Linear acceleration
-      imu_msg->linear_acceleration.x = epson_data_.accel_x;
-      imu_msg->linear_acceleration.y = epson_data_.accel_y;
-      imu_msg->linear_acceleration.z = epson_data_.accel_z;
-
-      // Angular velocity
-      imu_msg->angular_velocity.x = epson_data_.gyro_x;
-      imu_msg->angular_velocity.y = epson_data_.gyro_y;
-      imu_msg->angular_velocity.z = epson_data_.gyro_z;
-
-      // Orientation
-      imu_msg->orientation.x = epson_data_.qtn1;
-      imu_msg->orientation.y = epson_data_.qtn2;
-      imu_msg->orientation.z = epson_data_.qtn3;
-      imu_msg->orientation.w = epson_data_.qtn0;
-
-      imu_data_pub_->publish(*imu_msg);
-
-      // Temperature
-      tempc_msg->header = imu_msg->header;
-      tempc_msg->temperature = epson_data_.temperature;
-      tempc_msg->variance = 0;
-      imu_tempc_pub_->publish(*tempc_msg);
-
-      static uint32_t seq = 0;
-
-      std_msgs::msg::UInt32 seq_msg;
-      seq_msg.data = seq++;
-      seq_pub_->publish(seq_msg);
-
-      std_msgs::msg::UInt32 count_msg;
-      count_msg.data = epson_data_.count;
-      count_pub_->publish(count_msg);
-
+  if (sensorDataReadBurstNOptions(&epson_sensor_, &options_, &epson_data_)) {
+    if (!time_correction_) {
+      rclcpp::Time stamp(0, epson_data_.count * 16000);
+      imu_msg->header.stamp = stamp;
     } else {
-      RCLCPP_WARN(
-        this->get_logger(),
-        "Warning: Checksum error or incorrect delimiter bytes in imu_msg "
-        "detected");
+      imu_msg->header.stamp = tc.get_stamp(epson_data_.count);
     }
+
+    imu_msg->linear_acceleration.x = epson_data_.accel_x;
+    imu_msg->linear_acceleration.y = epson_data_.accel_y;
+    imu_msg->linear_acceleration.z = epson_data_.accel_z;
+
+    imu_msg->angular_velocity.x = epson_data_.gyro_x;
+    imu_msg->angular_velocity.y = epson_data_.gyro_y;
+    imu_msg->angular_velocity.z = epson_data_.gyro_z;
+
+    imu_msg->orientation.x = epson_data_.qtn1;
+    imu_msg->orientation.y = epson_data_.qtn2;
+    imu_msg->orientation.z = epson_data_.qtn3;
+    imu_msg->orientation.w = epson_data_.qtn0;
+
+    imu_data_pub_->publish(*imu_msg);
+
+    tempc_msg->header = imu_msg->header;
+    tempc_msg->temperature = epson_data_.temperature;
+    tempc_msg->variance = 0;
+    imu_tempc_pub_->publish(*tempc_msg);
+
+    static uint32_t seq = 0;
+
+    std_msgs::msg::UInt32 seq_msg;
+    seq_msg.data = seq++;
+    seq_pub_->publish(seq_msg);
+
+    std_msgs::msg::UInt32 count_msg;
+    count_msg.data = epson_data_.count;
+    count_pub_->publish(count_msg);
+  } else {
+    RCLCPP_WARN(
+      this->get_logger(),
+      "Warning: Checksum error or incorrect delimiter bytes in imu_msg detected");
   }
 }
   void Spin() { PubImuData(); }
